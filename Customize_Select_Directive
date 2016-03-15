@@ -1,0 +1,40 @@
+.directive('largeSelect', [function () {
+	return {
+		restrict: 'E',
+		require: 'ngModel',
+		link: function (scope, elm, attrs, ctrl) {
+			var select = document.createElement("SELECT");
+			elm[0].appendChild(select);
+
+			function updateOptions (data) {
+				var fragment = document.createDocumentFragment();
+				select.innerHTML = "";
+				if (angular.isArray(data)) {
+					for (var i = 0; i < data.length; i++) {
+						var option = document.createElement("OPTION");
+						option.text = option.innerText = data[i];
+						fragment.appendChild(option);
+					}
+					select.appendChild(fragment);
+				}
+			}
+
+			scope.$watch(attrs.data, function (newVal, oldVal) {
+				updateOptions(newVal);
+			});
+
+			scope.$watch(attrs.ngModel, function (newVal, oldVal) {
+				var option = select.querySelector("option[value=\"" + newVal + "\"]");
+				if (option) {
+					option.selected = true;
+					option.setAttribute('selected', 'selected');
+				}
+			});
+
+			select.addEventListener("change", function (event) {
+				select.options[select.options.selectedIndex].selected = true;
+				ctrl.$setViewValue(select.options[select.options.selectedIndex].value);
+			});
+		}
+	};
+}]);
